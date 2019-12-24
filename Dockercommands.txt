@@ -1,0 +1,143 @@
+#Run docker image in interactive mode (terminal will hang until image instance/container is shutdown)
+docker run <image name>
+
+#Run docker image in backgroun/daemon mode. The terminal will return to promt view to take other commands
+docker run -d <image name>
+
+#Run docker image in backgroun/daemon mode with the container port exposed over another external port number.
+docker run -p external_port:container_port -d <image name>
+
+or
+
+docker container run -p external_port:internal_port -d <image_name/image_id>
+
+#View the container logs of images run in daemon mode. in this command the terminal displays the logs and return to command prompt ready to take next command
+docker logs container_id 
+
+#View the container logs of images run in daemon mode tailing the logs
+docker logs -f container_id 
+
+#Return the list of container running ONLY.
+docker container ls 
+
+#Return the list of container running and exited. (-a switch return even the exited images)
+docker container ls -a
+
+#Stop running containers.
+docker container stop <image_id>
+
+#Search for images on Docker hub
+docker search <image name>
+
+#Tagging a image with a new name
+docker tag in28min/todo-rest-api:1.0.0.RELEASE in28min/todo-rest-api:latest
+
+#To view the history or list of steps involved in create the image 
+docker image history <image_name/id>
+
+or 
+
+docker history <image_name/id>
+
+#Details inspection of the entire image configuration
+docker image inspect <image_name/id>
+
+#remove docker image
+docker rmi <image_name/id>
+
+or 
+
+docker image remove <image_name/id>
+
+#inspect a running container
+docker container inspect <container_name/image_id>
+
+#pause a running container
+docker container pause <container_name/id>
+
+docker container unpause <container_name/id>
+
+#kill a running docker container
+docker container kill <container_name/id>
+
+#Remove all stopped container
+docker container prune
+
+#Start a container to always start when the docker daemon restarts
+docker container run -p external_port:internal_port -d --restart=always <image_name/image_id>
+
+#Docker event monitoring.. start and stop of container etc
+docker events
+
+#show docker process stats similar to task manager across container.
+docker stats
+
+#view the processes running within a container
+docker container top 98e42b3a24c2
+
+#start a new container with a SPECIFIED RAM and CPU QUOTA (max cpu quota is 100000. define cpu as subset of that e.g. 25000). Watch the stats to make sure the memory and cpu are used according to settings
+docker container run -p 5000:5000 -d -m 512m --cpu-quota 30000 in28min/todo-rest-api-h2:1.0.0.RELEASE
+
+#List the images and container status (similar to disk usage in Linux)
+docker system df
+
+#Run container in interactive mode i=Interactive t=tty - 
+docker container run -dit <image_name/image_id>
+
+e.g. interactive command
+docker container exec <container_id> <command>
+docker container exec naught_knuth ls /tmp
+
+#copy file/folder between host and container or container to host
+docker container cp <filename/folder_name> <container_id>:<unix path>
+e.g. docker container cp /home/work/my-spring-jar.jar abed132321:/home
+
+#save the container image
+docker container commit <container_id> <new_image_name>
+
+#Update containter to have an entry point command -                                                             
+docker container commit --change "CMD [\"java\",\"-jar\",\"/home/dockerhelloworld-0.0.1-SNAPSHOT.jar\"]" 7f5c4cf61519 dockerhelloworld-openjdk:manual2
+
+#build a docker image using a Dockerfile (-t is to specify tagname)
+docker build -t dockerhelloworld:auto1 .
+
+docker file spotify plug - reads the Dockerfile in the project folder and create the image
+
+JIB maven plug - No docker file is needed or used. It has default configuration to create spring boot image automatically. Further customization is allowed with regards to base image, exposed port, jvm argument etc.
+
+fabric8io maven plug - hybrid of spotify and jib plugin. Can use Docker file if provided or has it own syntax to take docker instructions. 
+
+#Starting mysql docker image 
+docker run -dit -p 3307:3306 --name mysql -e MYSQL_ROOT_PASSWORD=rootpassword -e MYSQL_DATABASE=tododb -e MYSQL_USER=todouser -e MYSQL_PASSWORD=todopassword mysql:8.0.18
+
+--name Gives an alias name to the container like docker give those funny random suedo name
+-e option to pass environment variable (key value pair)
+-d run in detached mode
+-it interactive terminal/tty
+
+Abbreviated command - 
+docker run -dit --publish 3307:3306 --name mysql --env MYSQL_ROOT_PASSWORD=rootpassword --env MYSQL_DATABASE=tododb --env MYSQL_USER=todouser --env MYSQL_PASSWORD=todopassword mysql:8.0.18
+
+Run WebApp connecting to the DB container - 
+**Link (Deprecated approach) 
+E:\>docker run -dit -p 3307:3306 --name mysql --env MYSQL_ROOT_PASSWORD=rootpassword --env MYSQL_USER=todouser --env MYSQL_PASSWORD=todopassword --env MYSQL_DATABASE=tododb mysql:8.0.18
+
+
+#Linking 2 container to talk to each other (link spring-mvc-mysql webapp with mysql database container) BUT they cannot use localhost as "their host" is their *container* name and not physical host they are running on. 
+docker container run -dit -p 8080:8080 --link=mysql --env RDS_HOST_NAME=mysql --env RDS_HOST_PORT=3307 madhusudanmkrishnamurthy/hello-spring-mvc-mysql-mvn-spotify:0.0.1-SNAPSHOT
+
+Run WebApp connecting to the DB container previously started (Deprecated approach) -
+docker run -dit -p 8080:8080 --link=mysql --env RDS_HOST_NAME=mysql --env RDS_HOST_PORT:3307 madhusudanmkrishnamurthy/hello-spring-mvc-mysql-mvn-spotify:0.0.1-SNAPSHOT
+
+** Bridge approach 
+
+docker network ls
+
+docker network create web-mysql-network
+
+docker network ls
+
+Run database on the newly created network - 
+docker run -dit -p 3308:3306 --name mysql-bridge --env MYSQL_ROOT_PASSWORD=rootpassword --env MYSQL_USER=todouser --env MYSQL_PASSWORD=todopassword --env MYSQL_DATABASE=tododb --network web-mysql-network mysql:8.0.18
+
+docker run -dit -p 8080:8080 --network web-mysql-network --name web-bridge --env RDS_HOST_NAME=mysql-bridge --env RDS_HOST_PORT:3037 madhusudanmkrishnamurthy/hello-spring-mvc-mysql-mvn-spotify:0.0.1-SNAPSHOT
