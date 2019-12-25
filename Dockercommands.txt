@@ -138,6 +138,57 @@ docker network create web-mysql-network
 docker network ls
 
 Run database on the newly created network - 
-docker run -dit -p 3308:3306 --name mysql-bridge --env MYSQL_ROOT_PASSWORD=rootpassword --env MYSQL_USER=todouser --env MYSQL_PASSWORD=todopassword --env MYSQL_DATABASE=tododb --network web-mysql-network mysql:8.0.18
+docker run -dit -p 3307:3306 --name mysql-bridge --env MYSQL_ROOT_PASSWORD=rootpassword --env MYSQL_USER=todouser --env MYSQL_PASSWORD=todopassword --env MYSQL_DATABASE=tododb --network web-mysql-network mysql:8.0.18
 
-docker run -dit -p 8080:8080 --network web-mysql-network --name web-bridge --env RDS_HOST_NAME=mysql-bridge --env RDS_HOST_PORT:3037 madhusudanmkrishnamurthy/hello-spring-mvc-mysql-mvn-spotify:0.0.1-SNAPSHOT
+** This command doesn't work (with RDS_HOST_PORT)
+docker run -dit -p 8080:8080 --network web-mysql-network --name web-bridge --env RDS_HOST_NAME=mysql-bridge --env RDS_HOST_PORT:3036 madhusudanmkrishnamurthy/hello-spring-mvc-mysql-mvn-spotify:0.0.1-SNAPSHOT
+
+** This WORKED (without RDS_HOST_PORT)
+docker run -dit -p 8080:8080 --network web-mysql-network --name web-bridge --env RDS_HOST_NAME=mysql-bridge madhusudanmkrishnamurthy/hello-spring-mvc-mysql-mvn-spotify:0.0.1-SNAPSHOT
+
+# Provide volumes to Container to persist infor across container deletes/prune and share the data between containers
+docker run -dit -p 3307:3306 --name mysql-bridge --env MYSQL_ROOT_PASSWORD=rootpassword --env MYSQL_USER=todouser --env MYSQL_PASSWORD=todopassword --env MYSQL_DATABASE=tododb --network web-mysql-network --volume mysql-database-volume:/var/lib/mysql mysql:8.0.18
+
+# Short cut parameter - Provide volumes to Container to persist infor across container deletes/prune and share the data between containers
+docker run -dit -p 3307:3306 --name mysql-bridge --env MYSQL_ROOT_PASSWORD=rootpassword --env MYSQL_USER=todouser --env MYSQL_PASSWORD=todopassword --env MYSQL_DATABASE=tododb --network web-mysql-network -v mysql-database-volume:/var/lib/mysql mysql:8.0.18
+
+#Use mount (recommended approach) to mount volume
+docker run -dit -p 3307:3306 --name mysql-bridge --env MYSQL_ROOT_PASSWORD=rootpassword --env MYSQL_USER=todouser --env MYSQL_PASSWORD=todopassword --env MYSQL_DATABASE=tododb --network web-mysql-network --mount source=mysql-database-volume,target=/var/lib/mysql mysql:8.0.18
+
+#Inspect Volume 
+docker volume inspect mysql-database-volume
+
+#Delete a volume 
+docker volume rm mysql-database-volume
+
+#spring JWT security
+www.springboottutorial.com/spring-boot-react-full-stack-with-spring-security-basic-and-jwt-authentication
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                            Docker Compose
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#componse and start docker containers
+docker-compose up
+
+#run in detached mode
+docker-compose up -d
+
+#tear down services and resource started with docker-compose up
+docker-compose down
+
+#docker compose config will show the docker compose file used to start the services
+docker-compose config
+
+#show all the container and images managed by docker-compose
+docker-compose images
+
+#Show all the running container started by docker compose
+docker-compose ps 
+
+#show all the processes running within each container started by docker-compose
+docker-compose top
+
+#pause and unpause containers
+docker-compose pause
+docker-compose unpause
