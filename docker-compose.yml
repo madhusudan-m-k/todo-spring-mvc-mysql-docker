@@ -1,0 +1,39 @@
+version: "3.6"
+
+services:
+  web-bridge:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    container_name: web-bridge
+    environment:
+      RDS_HOST_NAME: mysql-bridge
+    restart: always
+    networks:
+      - "web-mysql-bridge"
+    depends_on:
+      - mysql-bridge
+
+  mysql-bridge:
+    image: mysql:8.0.18
+    container_name: mysql-bridge
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_USER: todouser
+      MYSQL_PASSWORD: todopassword
+      MYSQL_DATABASE: tododb
+    ports:
+      - "3307:3306"
+    restart: always
+    networks:
+      - web-mysql-bridge
+    volumes:
+      - dc-mysql-todo-database-volume:/var/lib/mysql
+
+volumes:
+  dc-mysql-todo-database-volume:
+
+networks:
+  web-mysql-bridge:
