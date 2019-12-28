@@ -88,6 +88,17 @@ e.g. interactive command
 docker container exec <container_id> <command>
 docker container exec naught_knuth ls /tmp
 
+#Enter interactive shell on the container 
+docker exec -it <container_name> bash
+e.g. docker exec -it mysql-db-container bash
+docker exec -it microservice-container bash
+
+#remove container after exiting and login into interactive SQL shell for mysql
+docker run -it --network some-network --rm mysql mysql -hsome-mysql -uexample-user -p
+
+#non docker remote access
+$ docker run -it --rm mysql mysql -hsome.mysql.host -usome-mysql-user -p
+
 #copy file/folder between host and container or container to host
 docker container cp <filename/folder_name> <container_id>:<unix path>
 e.g. docker container cp /home/work/my-spring-jar.jar abed132321:/home
@@ -174,6 +185,9 @@ docker-compose up
 #run in detached mode
 docker-compose up -d
 
+#just build the docker compose file. 
+docker-compose -f "docker-compose.yml" up -d --build
+
 #tear down services and resource started with docker-compose up
 docker-compose down
 
@@ -192,3 +206,18 @@ docker-compose top
 #pause and unpause containers
 docker-compose pause
 docker-compose unpause
+
+#stop all containers started by docker-compose
+docker-compose stop
+
+#kill all containers started by docker-compose
+docker-compose kill
+
+#prune all container
+docker-compose rm
+
+#docker build within docker compose (where ever build element is pointing to Docker file)
+docker-compose build 
+
+#Lookup 
+docker-compose run
