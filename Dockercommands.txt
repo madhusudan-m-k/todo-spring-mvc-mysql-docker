@@ -60,6 +60,11 @@ docker container unpause <container_name/id>
 #kill a running docker container
 docker container kill <container_name/id>
 
+#Remove a particular container 
+docker container rm <container_id or container_name>
+e.g. docker container rm ea323fc
+e.g. docker container rm mysql
+
 #Remove all stopped container
 docker container prune
 
